@@ -85,4 +85,4 @@ The plugin includes hooks (`mpr_handle_public_submission`) for integrating third
 **Version**: 1.1.0 
 **Author**: Mentaltude
 **URI**: https://www.missingpeople.co.ke
-**Platform**: WordPress 6.x | Hestia Theme Optimization.
+**Platform**: WordPress 6.x

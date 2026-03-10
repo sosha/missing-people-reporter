@@ -30,12 +30,9 @@
     nav,
     header,
     footer,
-    .hestia-blog-post,
     .mpr-print-action,
-    #hestia-header-nav,
     .mpr-social-share,
-    #comments,
-    .hestia-about {
+    #comments {
         display: none !important;
     }
 }
