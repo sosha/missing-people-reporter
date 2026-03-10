@@ -11,6 +11,7 @@
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 20px;
 }
+
 .mpr-summary-item {
     border: 1px solid #ddd;
     border-radius: 5px;
@@ -18,15 +19,18 @@
     text-align: center;
     background: #f9f9f9;
 }
+
 .mpr-summary-item img {
     width: 100%;
     height: 250px;
     object-fit: cover;
 }
+
 .mpr-summary-item h3 {
     margin: 10px 0;
     padding: 0 10px;
 }
+
 .mpr-summary-item p {
     margin: 0 0 15px 0;
     font-size: 0.9em;
@@ -39,45 +43,57 @@
     grid-template-columns: 1fr;
     gap: 30px;
 }
+
 @media (min-width: 768px) {
     .mpr-single-grid {
         grid-template-columns: 1fr 2fr;
     }
 }
+
 .mpr-main-image img {
     width: 100%;
     height: auto;
     border-radius: 5px;
 }
+
 .mpr-details-list {
     list-style: none;
     padding: 0;
     margin: 0 0 20px 0;
     border: 1px solid #eee;
 }
+
 .mpr-details-list li {
     padding: 10px;
     border-bottom: 1px solid #eee;
 }
+
 .mpr-details-list li:last-child {
     border-bottom: none;
 }
+
 .mpr-details-list li strong {
     display: inline-block;
     width: 180px;
     color: #333;
 }
+
 .mpr-single-right h3 {
     border-bottom: 2px solid #f0f0f0;
     padding-bottom: 5px;
     margin-top: 30px;
 }
+
 .mpr-single-right h3:first-of-type {
     margin-top: 0;
 }
-.mpr-social-share, .mpr-follow-btn, .mpr-unfollow-btn {
+
+.mpr-social-share,
+.mpr-follow-btn,
+.mpr-unfollow-btn {
     margin-top: 20px;
 }
+
 .mpr-social-share a {
     margin-right: 10px;
 }
@@ -89,9 +105,11 @@
     padding: 20px;
     margin-bottom: 20px;
 }
+
 .mpr-user-profile .profile-section h3 {
     margin-top: 0;
 }
+
 .mpr-user-profile ul {
     list-style-type: disc;
     padding-left: 20px;
@@ -101,11 +119,13 @@
 #mpr-public-form p {
     margin-bottom: 15px;
 }
+
 #mpr-public-form label {
     display: block;
     font-weight: bold;
     margin-bottom: 5px;
 }
+
 #mpr-public-form input[type="text"],
 #mpr-public-form input[type="number"],
 #mpr-public-form textarea {
@@ -124,7 +144,8 @@
     text-transform: uppercase;
     margin-top: 10px;
     color: #fff;
-    background: #e74c3c; /* Default Red for Missing */
+    background: #e74c3c;
+    /* Default Red for Missing */
 }
 
 .mpr-summary-item .mpr-status-badge {
@@ -132,13 +153,177 @@
 }
 
 .mpr-status-found-safe {
-    background: #27ae60; /* Green */
+    background: #27ae60;
+    /* Green */
 }
 
 .mpr-status-found-deceased {
-    background: #7f8c8d; /* Grey */
+    background: #7f8c8d;
+    /* Grey */
 }
 
 .mpr-status-cold-case {
-    background: #2980b9; /* Blue */
+    background: #2980b9;
+    /* Blue */
+}
+
+/* --- Filter Bar --- */
+.mpr-filter-bar {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    margin-bottom: 30px;
+    border: 1px solid #eee;
+}
+
+.mpr-filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+.mpr-filter-field {
+    flex: 1;
+    min-width: 200px;
+}
+
+.mpr-filter-search {
+    flex: 1.5;
+}
+
+.mpr-filter-field label {
+    display: block;
+    font-size: 0.85em;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #666;
+}
+
+.mpr-filter-field input,
+.mpr-filter-field select {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 0.95em;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.mpr-filter-field input:focus,
+.mpr-filter-field select:focus {
+    border-color: #3498db;
+}
+
+.mpr-filter-submit {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.mpr-btn-filter {
+    background: #3498db;
+    color: #fff;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.mpr-btn-filter:hover {
+    background: #2980b9;
+}
+
+.mpr-btn-reset {
+    font-size: 0.9em;
+    color: #e74c3c;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.mpr-btn-reset:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .mpr-filter-field {
+        min-width: 100%;
+    }
+
+    .mpr-filter-submit {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .mpr-btn-filter {
+        flex: 1;
+    }
+}
+
+/* --- Risk Level Badges --- */
+.mpr-status-badges-container,
+.mpr-header-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.mpr-risk-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.82em;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #fff;
+    letter-spacing: 0.5px;
+}
+
+.mpr-risk-badge.mpr-risk-high {
+    background: #c0392b;
+    box-shadow: 0 0 10px rgba(192, 57, 43, 0.4);
+    animation: mpr-pulse 2s infinite;
+}
+
+.mpr-risk-badge.mpr-risk-medium {
+    background: #d35400;
+}
+
+@keyframes mpr-pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(192, 57, 43, 0.7);
+    }
+
+    70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(192, 57, 43, 0);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(192, 57, 43, 0);
+    }
+}
+
+/* --- Map Integration --- */
+#mpr-single-map {
+    background: #f9f9f9;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    z-index: 10;
+}
+
+.leaflet-container {
+    font-family: inherit;
+}
+
+@media (max-width: 600px) {
+    #mpr-single-map {
+        height: 300px !important;
+    }
 }

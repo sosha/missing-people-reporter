@@ -48,6 +48,10 @@ function mpr_render_meta_box_fields($post)
 
     <div class="mpr-meta-grid">
         <p>
+            <label for="mpr_full_name">Full Name:</label>
+            <input type="text" id="mpr_full_name" name="mpr_full_name" value="<?php echo esc_attr($get_meta('mpr_full_name')); ?>">
+        </p>
+        <p>
             <label for="mpr_case_status">Case Status:</label>
             <select id="mpr_case_status" name="mpr_case_status">
                 <option value="Missing" <?php selected($get_meta('mpr_case_status'), 'Missing'); ?>>Missing</option>
@@ -55,6 +59,18 @@ function mpr_render_meta_box_fields($post)
                 <option value="Found - Deceased" <?php selected($get_meta('mpr_case_status'), 'Found - Deceased'); ?>>Found - Deceased</option>
                 <option value="Cold Case" <?php selected($get_meta('mpr_case_status'), 'Cold Case'); ?>>Cold Case</option>
             </select>
+        </p>
+        <p>
+            <label for="mpr_risk_level">Risk Level:</label>
+            <select id="mpr_risk_level" name="mpr_risk_level">
+                <option value="Low" <?php selected($get_meta('mpr_risk_level'), 'Low'); ?>>Low</option>
+                <option value="Medium" <?php selected($get_meta('mpr_risk_level'), 'Medium'); ?>>Medium</option>
+                <option value="High" <?php selected($get_meta('mpr_risk_level'), 'High'); ?>>High</option>
+            </select>
+        </p>
+        <p>
+            <label for="mpr_ethnicity">Ethnicity:</label>
+            <input type="text" id="mpr_ethnicity" name="mpr_ethnicity" value="<?php echo esc_attr($get_meta('mpr_ethnicity')); ?>">
         </p>
         <p>
             <label for="mpr_nickname">Nickname:</label>
@@ -105,6 +121,10 @@ function mpr_render_meta_box_fields($post)
             <label for="mpr_distinguishing_features">Distinguishing Features:</label>
             <?php wp_editor($get_meta('mpr_distinguishing_features'), 'mpr_distinguishing_features', ['textarea_rows' => 5, 'media_buttons' => false]); ?>
         </div>
+        <div class="full-width">
+            <label for="mpr_medical_conditions">Medical Conditions / Vulnerability:</label>
+            <textarea id="mpr_medical_conditions" name="mpr_medical_conditions" rows="3" style="width:100%;"><?php echo esc_textarea($get_meta('mpr_medical_conditions')); ?></textarea>
+        </div>
         <p>
             <label for="mpr_piercings">Piercings:</label>
             <input type="text" id="mpr_piercings" name="mpr_piercings" value="<?php echo esc_attr($get_meta('mpr_piercings')); ?>">
@@ -121,7 +141,23 @@ function mpr_render_meta_box_fields($post)
         <p>
             <label for="mpr_last_seen_location">Last Seen Location:</label>
             <input type="text" id="mpr_last_seen_location" name="mpr_last_seen_location" value="<?php echo esc_attr($get_meta('mpr_last_seen_location')); ?>">
+            <button type="button" id="mpr_geocode_button" class="button" style="margin-top:5px;">Find on Map</button>
         </p>
+        <div class="full-width">
+            <label>Physical Location (Pin on Map):</label>
+            <div id="mpr-admin-map" style="height: 300px; width: 100%; border: 1px solid #ccc; margin-bottom: 10px;"></div>
+            <div style="display: flex; gap: 10px;">
+                <p style="flex: 1;">
+                    <label for="mpr_latitude">Latitude:</label>
+                    <input type="text" id="mpr_latitude" name="mpr_latitude" value="<?php echo esc_attr($get_meta('mpr_latitude')); ?>" readonly>
+                </p>
+                <p style="flex: 1;">
+                    <label for="mpr_longitude">Longitude:</label>
+                    <input type="text" id="mpr_longitude" name="mpr_longitude" value="<?php echo esc_attr($get_meta('mpr_longitude')); ?>" readonly>
+                </p>
+            </div>
+            <p class="description">Click the map to set the exact coordinates, or use the "Find on Map" button above to search based on the text location.</p>
+        </div>
         <p class="full-width">
             <label for="mpr_what_they_were_wearing">What they were wearing:</label>
             <input type="text" id="mpr_what_they_were_wearing" name="mpr_what_they_were_wearing" value="<?php echo esc_attr($get_meta('mpr_what_they_were_wearing')); ?>">
@@ -179,11 +215,12 @@ function mpr_save_meta_box_data($post_id)
 
     // Define all the meta keys to loop through
     $meta_keys = [
-        'mpr_nickname', 'mpr_age', 'mpr_dob', 'mpr_gender', 'mpr_height', 'mpr_body_type', 'mpr_weight',
+        'mpr_full_name', 'mpr_nickname', 'mpr_age', 'mpr_dob', 'mpr_gender', 'mpr_height', 'mpr_body_type', 'mpr_weight',
         'mpr_hair_color', 'mpr_hair_style', 'mpr_eye_color', 'mpr_piercings', 'mpr_tattoos',
         'mpr_date_last_seen', 'mpr_last_seen_location', 'mpr_what_they_were_wearing',
         'mpr_police_station', 'mpr_ob_number', 'mpr_police_phone', 'mpr_police_email', 'mpr_investigating_officer',
-        'mpr_contact_person', 'mpr_contact_person_email', 'mpr_other_images', 'mpr_case_status'
+        'mpr_contact_person', 'mpr_contact_person_email', 'mpr_other_images', 'mpr_case_status', 'mpr_medical_conditions', 'mpr_ethnicity', 'mpr_risk_level',
+        'mpr_latitude', 'mpr_longitude'
     ];
 
     foreach ($meta_keys as $key) {

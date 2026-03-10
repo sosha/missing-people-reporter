@@ -1,0 +1,151 @@
+/* 
+    Missing People Reporter - Print Stylesheet
+    Designed for A4/Letter Missing Person Posters
+*/
+
+/* 1. Hide everything by default when printing */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    /* 2. Show only the poster container and its children */
+    #mpr-poster-template,
+    #mpr-poster-template * {
+        visibility: visible;
+    }
+
+    #mpr-poster-template {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background: #fff;
+        color: #000;
+    }
+
+    /* Hide web elements that might still be visible */
+    nav,
+    header,
+    footer,
+    .hestia-blog-post,
+    .mpr-print-action,
+    #hestia-header-nav,
+    .mpr-social-share,
+    #comments,
+    .hestia-about {
+        display: none !important;
+    }
+}
+
+/* 3. Poster Layout Design */
+.mpr-poster-wrapper {
+    display: none;
+    /* Hidden on web, shown in print */
+}
+
+@media print {
+    .mpr-poster-wrapper {
+        display: block !important;
+        padding: 40px;
+        border: 10px solid #cc0000;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .mpr-poster-header {
+        text-align: center;
+        background: #cc0000;
+        color: #fff;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+
+    .mpr-poster-header h1 {
+        font-size: 80px !important;
+        margin: 0 !important;
+        text-transform: uppercase;
+        letter-spacing: 10px;
+        font-weight: 900 !important;
+    }
+
+    .mpr-poster-image {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .mpr-poster-image img {
+        max-width: 100%;
+        max-height: 450px;
+        border: 5px solid #000;
+    }
+
+    .mpr-poster-name {
+        text-align: center;
+        font-size: 48px !important;
+        font-weight: 800 !important;
+        margin-top: 0 !important;
+        margin-bottom: 10px !important;
+        text-transform: uppercase;
+    }
+
+    .mpr-poster-risk {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .mpr-poster-risk-badge {
+        display: inline-block;
+        background: #000;
+        color: #fff;
+        padding: 5px 20px;
+        font-size: 20px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .mpr-poster-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+        font-size: 22px;
+    }
+
+    .mpr-poster-section h3 {
+        background: #eee;
+        padding: 5px 10px;
+        margin-top: 0;
+        font-size: 24px;
+        border-bottom: 2px solid #000;
+    }
+
+    .mpr-poster-contact {
+        text-align: center;
+        background: #ffeeee;
+        border: 3px dashed #cc0000;
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    .mpr-poster-contact h2 {
+        font-size: 32px !important;
+        color: #cc0000;
+        margin-top: 0 !important;
+    }
+
+    .mpr-poster-contact p {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .mpr-poster-footer {
+        text-align: center;
+        margin-top: 40px;
+        font-size: 14px;
+        color: #666;
+    }
+}

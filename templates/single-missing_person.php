@@ -108,6 +108,12 @@ do_action('hestia_before_single_page_wrapper'); //
                                 <a href="https://twitter.com/intent/tweet?url=<?php echo urlencode(get_permalink()); ?>&text=<?php echo urlencode('Missing: ' . get_the_title()); ?>" target="_blank">X</a>
                                 <a href="https://www.linkedin.com/shareArticle?mini=true&url=<?php echo urlencode(get_permalink()); ?>&title=<?php echo urlencode('Missing: ' . get_the_title()); ?>" target="_blank">LinkedIn</a>
                             </div>
+
+                            <div class="mpr-print-action" style="margin-top: 20px;">
+                                <button onclick="window.print();" class="mpr-btn-print" style="width: 100%; background: #2c3e50; color: #fff; border: none; padding: 12px; border-radius: 5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                    <span class="dashicons dashicons-printer"></span> Print Missing Poster
+                                </button>
+                            </div>
                         </div>
 
                         <div class="mpr-single-right">
@@ -116,13 +122,21 @@ do_action('hestia_before_single_page_wrapper'); //
 ?>
                             <header class="entry-header">
                                 <?php the_title('<h1 class="entry-title">', '</h1>'); ?>
-                                <?php
+                                <div class="mpr-header-badges">
+                                    <?php
     $status = get_post_meta(get_the_ID(), 'mpr_case_status', true);
     if (!$status)
         $status = 'Missing';
     $status_class = 'mpr-status-' . sanitize_title($status);
     echo '<div class="mpr-status-badge ' . esc_attr($status_class) . '">' . esc_html($status) . '</div>';
+
+    $risk_level = get_post_meta(get_the_ID(), 'mpr_risk_level', true);
+    if ($risk_level && 'Low' !== $risk_level) {
+        $risk_class = 'mpr-risk-' . sanitize_title($risk_level);
+        echo '<div class="mpr-risk-badge ' . esc_attr($risk_class) . '">' . esc_html($risk_level) . ' Risk</div>';
+    }
 ?>
+                                </div>
                             </header>
 
                             <h3>Personal Information</h3>
@@ -130,8 +144,10 @@ do_action('hestia_before_single_page_wrapper'); //
                                 <?php $meta = get_post_meta(get_the_ID()); ?>
                                 <li><strong>Nickname:</strong> <?php echo esc_html($meta['mpr_nickname'][0] ?? 'N/A'); ?></li>
                                 <li><strong>Age:</strong> <?php echo esc_html($meta['mpr_age'][0] ?? 'N/A'); ?></li>
+                                <li><strong>Ethnicity:</strong> <?php echo esc_html($meta['mpr_ethnicity'][0] ?? 'N/A'); ?></li>
                                 <li><strong>Date of Birth:</strong> <?php echo esc_html($meta['mpr_dob'][0] ?? 'N/A'); ?></li>
                                 <li><strong>Gender:</strong> <?php echo esc_html($meta['mpr_gender'][0] ?? 'N/A'); ?></li>
+                                <li><strong>Medical Conditions:</strong> <?php echo esc_html($meta['mpr_medical_conditions'][0] ?? 'N/A'); ?></li>
                             </ul>
 
                             <h3>Physical Description</h3>
@@ -165,7 +181,20 @@ do_action('hestia_before_single_page_wrapper'); //
                                   <li><strong>Contact Email:</strong> <?php echo esc_html($meta['mpr_contact_person_email'][0] ?? 'N/A'); ?></li>
                             </ul>
 
-                            <h3>Main Description</h3>
+                            <?php
+    $lat = get_post_meta(get_the_ID(), 'mpr_latitude', true);
+    $lng = get_post_meta(get_the_ID(), 'mpr_longitude', true);
+    if ($lat && $lng):
+?>
+                             <div class="mpr-map-container" style="margin-bottom: 25px;">
+                                 <h3>Last Seen Location Map</h3>
+                                 <div id="mpr-single-map" style="height: 400px; width: 100%; border-radius: 8px; border: 1px solid #eee; margin-top:10px;"></div>
+                                 <p class="description" style="font-size: 0.85em; color: #666; margin-top: 5px;">Approximate location where the person was last seen.</p>
+                             </div>
+                             <?php
+    endif; ?>
+
+                             <h3>Main Description</h3>
                             <div class="mpr-description">
                                 <?php the_content(); ?>
                             </div>
@@ -192,6 +221,60 @@ do_action('hestia_before_single_page_wrapper'); //
         comments_template();
     endif;
 ?>
+
+                    <!-- MPR Poster Template (Hidden on web, shown in print) -->
+                    <div id="mpr-poster-template" class="mpr-poster-wrapper">
+                        <div class="mpr-poster-header">
+                            <h1>MISSING</h1>
+                        </div>
+
+                        <div class="mpr-poster-image">
+                            <?php if ($first_image_src): ?>
+                                <img src="<?php echo esc_url($first_image_src); ?>" alt="Missing Person Photo">
+                            <?php
+    endif; ?>
+                        </div>
+
+                        <div class="mpr-poster-content">
+                            <h2 class="mpr-poster-name"><?php the_title(); ?></h2>
+                            
+                            <div class="mpr-poster-risk">
+                                <span class="mpr-poster-risk-badge"><?php echo esc_html($risk_level); ?> RISK</span>
+                                <span class="mpr-poster-risk-badge"><?php echo esc_html($status); ?></span>
+                            </div>
+
+                            <div class="mpr-poster-grid">
+                                <div class="mpr-poster-section">
+                                    <h3>Personal Details</h3>
+                                    <p><strong>Age:</strong> <?php echo esc_html($meta['mpr_age'][0] ?? 'N/A'); ?></p>
+                                    <p><strong>Height:</strong> <?php echo esc_html($meta['mpr_height'][0] ?? 'N/A'); ?></p>
+                                    <p><strong>Gender:</strong> <?php echo esc_html($meta['mpr_gender'][0] ?? 'N/A'); ?></p>
+                                    <p><strong>Last Seen:</strong> <?php echo esc_html($meta['mpr_date_last_seen'][0] ?? 'N/A'); ?></p>
+                                </div>
+                                <div class="mpr-poster-section">
+                                    <h3>Last Known Location</h3>
+                                    <p><?php echo esc_html($meta['mpr_last_seen_location'][0] ?? 'N/A'); ?></p>
+                                    <p><strong>Wearing:</strong> <?php echo esc_html($meta['mpr_what_they_were_wearing'][0] ?? 'N/A'); ?></p>
+                                </div>
+                            </div>
+
+                            <div class="mpr-poster-description">
+                                <h3>Case Summary</h3>
+                                <p><?php echo wp_trim_words(get_the_content(), 50); ?></p>
+                            </div>
+
+                            <div class="mpr-poster-contact">
+                                <h2>HAVE YOU SEEN THEM?</h2>
+                                <p>Report to: <?php echo esc_html($meta['mpr_police_station'][0] ?? 'Local Police'); ?></p>
+                                <p>Police Phone: <?php echo esc_html($meta['mpr_police_phone'][0] ?? '999'); ?></p>
+                                <p>OB Number: <?php echo esc_html($meta['mpr_ob_number'][0] ?? 'N/A'); ?></p>
+                            </div>
+                        </div>
+
+                        <div class="mpr-poster-footer">
+                            <p>Generated by Missing People Reporter - [www.missing.ke]</p>
+                        </div>
+                    </div>
                 </article>
             <?php
 endwhile; ?>
