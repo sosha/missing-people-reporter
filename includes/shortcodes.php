@@ -5,9 +5,10 @@ if (!defined('ABSPATH')) {
 }
 
 // [missing_people_summary] Shortcode
-function mpr_summary_shortcode($atts) {
+function mpr_summary_shortcode($atts)
+{
     $atts = shortcode_atts(['layout' => 'grid'], $atts, 'missing_people_summary');
-    
+
     $query = new WP_Query([
         'post_type' => 'missing_person',
         'post_status' => 'publish',
@@ -44,12 +45,12 @@ function mpr_summary_shortcode($atts) {
         // If no featured image or failed to get its URL, try to get attached images
         if (empty($first_image_src)) {
             $args = array(
-                'post_type'      => 'attachment',
+                'post_type' => 'attachment',
                 'post_mime_type' => 'image',
-                'post_parent'    => get_the_ID(),
-                'numberposts'    => 1, // We only need the first one
-                'order'          => 'ASC',
-                'orderby'        => 'menu_order ID',
+                'post_parent' => get_the_ID(),
+                'numberposts' => 1, // We only need the first one
+                'order' => 'ASC',
+                'orderby' => 'menu_order ID',
             );
             $attachments = get_children($args);
 
@@ -61,7 +62,8 @@ function mpr_summary_shortcode($atts) {
                         $alt_text = get_post_meta($attachment->ID, '_wp_attachment_image_alt', true);
                         if (!empty($alt_text)) {
                             $image_alt = $alt_text;
-                        } elseif (!empty($attachment->post_title)) { // Fallback to attachment title
+                        }
+                        elseif (!empty($attachment->post_title)) { // Fallback to attachment title
                             $image_alt = $attachment->post_title;
                         }
                         break; // Found the first attached image, exit loop
@@ -85,23 +87,34 @@ function mpr_summary_shortcode($atts) {
 
         $output .= '<div class="mpr-summary-item">';
         $output .= '<a href="' . get_permalink() . '">';
-        
+
         // Display the found image or placeholder
         if ($first_image_src) {
             $output .= '<img src="' . esc_url($first_image_src) . '" alt="' . esc_attr($image_alt) . '">';
-        } else {
+        }
+        else {
             // Fallback to the original placeholder if no image found by any method
             $output .= '<img src="' . MPR_PLUGIN_URL . 'assets/images/placeholder.png" alt="Placeholder Image">';
         }
-        
+
         $output .= '</a>';
         $output .= '<h3><a href="' . get_permalink() . '">' . get_the_title() . '</a></h3>';
+        if ($age) {
+            $output .= '<p><strong>Age:</strong> ' . esc_html($age) . '</p>';
+        }
         if ($age) {
             $output .= '<p><strong>Age:</strong> ' . esc_html($age) . '</p>';
         }
         if ($location) {
             $output .= '<p><strong>Last Seen:</strong> ' . esc_html($location) . '</p>';
         }
+
+        $status = get_post_meta(get_the_ID(), 'mpr_case_status', true);
+        if (!$status)
+            $status = 'Missing';
+        $status_class = 'mpr-status-' . sanitize_title($status);
+        $output .= '<div class="mpr-status-badge ' . esc_attr($status_class) . '">' . esc_html($status) . '</div>';
+
         $output .= '</div>';
     }
     $output .= '</div>';
@@ -113,9 +126,10 @@ add_shortcode('missing_people_summary', 'mpr_summary_shortcode');
 
 
 // [mpr_public_report_form] Shortcode
-function mpr_public_report_form_shortcode() {
+function mpr_public_report_form_shortcode()
+{
     ob_start();
-    ?>
+?>
     <form id="mpr-public-form" action="" method="POST" enctype="multipart/form-data">
         <?php wp_nonce_field('mpr_public_submission', 'mpr_public_nonce'); ?>
         

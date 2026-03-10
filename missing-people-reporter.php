@@ -216,6 +216,15 @@ function mpr_activate_plugin() {
         'sanitize_callback' => 'sanitize_text_field', // Sanitize as text field
         'auth_callback'     => '__return_true', // Allow all users to read/write for now, refine as needed
     ));
+    // Case Status field
+    register_post_meta('missing_person', 'mpr_case_status', array(
+        'show_in_rest'      => true,
+        'single'            => true,
+        'type'              => 'string',
+        'default'           => 'Missing',
+        'sanitize_callback' => 'sanitize_text_field',
+        'auth_callback'     => '__return_true',
+    ));
 }
 
 // Plugin Deactivation Hook (optional, but good practice)

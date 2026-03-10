@@ -5,20 +5,22 @@ if (!defined('ABSPATH')) {
 }
 
 // 1. Add the Meta Box to the 'missing_person' CPT
-function mpr_add_meta_boxes() {
+function mpr_add_meta_boxes()
+{
     add_meta_box(
-        'mpr_details_meta_box',          // ID
-        'Missing Person Details',        // Title
-        'mpr_render_meta_box_fields',    // Callback function to render HTML
-        'missing_person',                // Post Type
-        'normal',                        // Context (normal, side)
-        'high'                           // Priority
+        'mpr_details_meta_box', // ID
+        'Missing Person Details', // Title
+        'mpr_render_meta_box_fields', // Callback function to render HTML
+        'missing_person', // Post Type
+        'normal', // Context (normal, side)
+        'high' // Priority
     );
 }
 add_action('add_meta_boxes', 'mpr_add_meta_boxes');
 
 // 2. Render the HTML fields for the Meta Box (COMPLETE VERSION)
-function mpr_render_meta_box_fields($post) {
+function mpr_render_meta_box_fields($post)
+{
     // Add a nonce field for security
     wp_nonce_field('mpr_save_meta_box_data', 'mpr_meta_box_nonce');
 
@@ -26,11 +28,11 @@ function mpr_render_meta_box_fields($post) {
     $meta = get_post_meta($post->ID);
 
     // Helper function to get meta value
-    $get_meta = function($key) use ($meta) {
+    $get_meta = function ($key) use ($meta) {
         return $meta[$key][0] ?? '';
     };
 
-    ?>
+?>
     <style>
         .mpr-meta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         .mpr-meta-grid .full-width { grid-column: 1 / -1; }
@@ -45,6 +47,15 @@ function mpr_render_meta_box_fields($post) {
     </style>
 
     <div class="mpr-meta-grid">
+        <p>
+            <label for="mpr_case_status">Case Status:</label>
+            <select id="mpr_case_status" name="mpr_case_status">
+                <option value="Missing" <?php selected($get_meta('mpr_case_status'), 'Missing'); ?>>Missing</option>
+                <option value="Found - Safe" <?php selected($get_meta('mpr_case_status'), 'Found - Safe'); ?>>Found - Safe</option>
+                <option value="Found - Deceased" <?php selected($get_meta('mpr_case_status'), 'Found - Deceased'); ?>>Found - Deceased</option>
+                <option value="Cold Case" <?php selected($get_meta('mpr_case_status'), 'Cold Case'); ?>>Cold Case</option>
+            </select>
+        </p>
         <p>
             <label for="mpr_nickname">Nickname:</label>
             <input type="text" id="mpr_nickname" name="mpr_nickname" value="<?php echo esc_attr($get_meta('mpr_nickname')); ?>">
@@ -92,7 +103,7 @@ function mpr_render_meta_box_fields($post) {
         </p>
         <div class="full-width">
             <label for="mpr_distinguishing_features">Distinguishing Features:</label>
-            <?php wp_editor( $get_meta('mpr_distinguishing_features'), 'mpr_distinguishing_features', ['textarea_rows' => 5, 'media_buttons' => false] ); ?>
+            <?php wp_editor($get_meta('mpr_distinguishing_features'), 'mpr_distinguishing_features', ['textarea_rows' => 5, 'media_buttons' => false]); ?>
         </div>
         <p>
             <label for="mpr_piercings">Piercings:</label>
@@ -155,19 +166,24 @@ function mpr_render_meta_box_fields($post) {
 }
 
 // 3. Save the custom field data (COMPLETE VERSION)
-function mpr_save_meta_box_data($post_id) {
-    if (!isset($_POST['mpr_meta_box_nonce']) || !wp_verify_nonce($_POST['mpr_meta_box_nonce'], 'mpr_save_meta_box_data')) return;
-    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
-    if (!current_user_can('edit_post', $post_id)) return;
-    if (wp_is_post_revision($post_id)) return;
+function mpr_save_meta_box_data($post_id)
+{
+    if (!isset($_POST['mpr_meta_box_nonce']) || !wp_verify_nonce($_POST['mpr_meta_box_nonce'], 'mpr_save_meta_box_data'))
+        return;
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
+        return;
+    if (!current_user_can('edit_post', $post_id))
+        return;
+    if (wp_is_post_revision($post_id))
+        return;
 
     // Define all the meta keys to loop through
     $meta_keys = [
         'mpr_nickname', 'mpr_age', 'mpr_dob', 'mpr_gender', 'mpr_height', 'mpr_body_type', 'mpr_weight',
         'mpr_hair_color', 'mpr_hair_style', 'mpr_eye_color', 'mpr_piercings', 'mpr_tattoos',
         'mpr_date_last_seen', 'mpr_last_seen_location', 'mpr_what_they_were_wearing',
-        'mpr_police_station', 'mpr_ob_number', 'mpr_police_phone', 'mpr_police_email', 'mpr_investigating_officer', 
-        'mpr_contact_person', 'mpr_contact_person_email', 'mpr_other_images'
+        'mpr_police_station', 'mpr_ob_number', 'mpr_police_phone', 'mpr_police_email', 'mpr_investigating_officer',
+        'mpr_contact_person', 'mpr_contact_person_email', 'mpr_other_images', 'mpr_case_status'
     ];
 
     foreach ($meta_keys as $key) {

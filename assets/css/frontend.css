@@ -113,3 +113,32 @@
     padding: 8px;
     border: 1px solid #ccc;
 }
+
+/* --- Status Badges --- */
+.mpr-status-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-top: 10px;
+    color: #fff;
+    background: #e74c3c; /* Default Red for Missing */
+}
+
+.mpr-summary-item .mpr-status-badge {
+    margin-bottom: 15px;
+}
+
+.mpr-status-found-safe {
+    background: #27ae60; /* Green */
+}
+
+.mpr-status-found-deceased {
+    background: #7f8c8d; /* Grey */
+}
+
+.mpr-status-cold-case {
+    background: #2980b9; /* Blue */
+}

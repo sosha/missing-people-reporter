@@ -8,7 +8,7 @@
  */
 
 // Function to track views. Call this at the top of the single template.
-if ( function_exists( 'mpr_track_view' ) ) {
+if (function_exists('mpr_track_view')) {
     mpr_track_view(get_the_ID());
 }
 
@@ -16,88 +16,91 @@ get_header(); // This pulls in Hestia's main site header (logo, menu, etc.).
 
 // This action hook is crucial for displaying Hestia's page header (title, breadcrumbs)
 // and setting up the main wrapper for the content.
-do_action( 'hestia_before_single_page_wrapper' ); //
+do_action('hestia_before_single_page_wrapper'); //
 
 ?>
 <div class="<?php echo hestia_layout(); ?>">
     <div class="blog-post"> <?php // This is a key wrapper in Hestia's page templates ?>
         <div class="container"> <?php // Hestia's main content container ?>
 
-            <?php while (have_posts()) : the_post(); ?>
+            <?php while (have_posts()):
+    the_post(); ?>
                 <article id="post-<?php the_ID(); ?>" <?php post_class('hestia-blog-post'); ?>>
 
                     <?php
-                    // --- Start of Original Missing Person Content (within Hestia's primary content area) ---
+    // --- Start of Original Missing Person Content (within Hestia's primary content area) ---
 
-                    // Image fetching logic
-                    $first_image_src = '';
-                    $image_alt = get_the_title();
+    // Image fetching logic
+    $first_image_src = '';
+    $image_alt = get_the_title();
 
-                    if (has_post_thumbnail()) {
-                        $image_id = get_post_thumbnail_id();
-                        $image_array = wp_get_attachment_image_src($image_id, 'large');
-                        if ($image_array) {
-                            $first_image_src = $image_array[0];
-                            $image_alt = get_post_meta($image_id, '_wp_attachment_image_alt', true);
-                            if (empty($image_alt)) {
-                                $image_alt = get_the_title();
-                            }
-                        }
+    if (has_post_thumbnail()) {
+        $image_id = get_post_thumbnail_id();
+        $image_array = wp_get_attachment_image_src($image_id, 'large');
+        if ($image_array) {
+            $first_image_src = $image_array[0];
+            $image_alt = get_post_meta($image_id, '_wp_attachment_image_alt', true);
+            if (empty($image_alt)) {
+                $image_alt = get_the_title();
+            }
+        }
+    }
+
+    if (empty($first_image_src)) {
+        $args = array(
+            'post_type' => 'attachment',
+            'post_mime_type' => 'image',
+            'post_parent' => get_the_ID(),
+            'numberposts' => 1,
+            'order' => 'ASC',
+            'orderby' => 'menu_order ID',
+        );
+        $attachments = get_children($args);
+
+        if ($attachments) {
+            foreach ($attachments as $attachment) {
+                $image_array = wp_get_attachment_image_src($attachment->ID, 'large');
+                if ($image_array) {
+                    $first_image_src = $image_array[0];
+                    $image_alt = get_post_meta($attachment->ID, '_wp_attachment_image_alt', true);
+                    if (empty($image_alt)) {
+                        $image_alt = $attachment->post_title;
                     }
-
-                    if (empty($first_image_src)) {
-                        $args = array(
-                            'post_type'      => 'attachment',
-                            'post_mime_type' => 'image',
-                            'post_parent'    => get_the_ID(),
-                            'numberposts'    => 1,
-                            'order'          => 'ASC',
-                            'orderby'        => 'menu_order ID',
-                        );
-                        $attachments = get_children($args);
-
-                        if ($attachments) {
-                            foreach ($attachments as $attachment) {
-                                $image_array = wp_get_attachment_image_src($attachment->ID, 'large');
-                                if ($image_array) {
-                                    $first_image_src = $image_array[0];
-                                    $image_alt = get_post_meta($attachment->ID, '_wp_attachment_image_alt', true);
-                                    if (empty($image_alt)) {
-                                        $image_alt = $attachment->post_title;
-                                    }
-                                    if (empty($image_alt)) {
-                                        $image_alt = get_the_title();
-                                    }
-                                    break;
-                                }
-                            }
-                        }
+                    if (empty($image_alt)) {
+                        $image_alt = get_the_title();
                     }
+                    break;
+                }
+            }
+        }
+    }
 
-                    if (empty($first_image_src)) {
-                        $content_post = get_the_content();
-                        preg_match('/<img.+src=[\'"]([^\'"]+)[\'"].*>/i', $content_post, $matches);
-                        if (!empty($matches[1])) {
-                            $first_image_src = $matches[1];
-                            preg_match('/<img.+alt=[\'"]([^\'"]+)[\'"].*>/i', $content_post, $alt_matches);
-                            $image_alt = !empty($alt_matches[1]) ? $alt_matches[1] : get_the_title();
-                        }
-                    }
-                    ?>
+    if (empty($first_image_src)) {
+        $content_post = get_the_content();
+        preg_match('/<img.+src=[\'"]([^\'"]+)[\'"].*>/i', $content_post, $matches);
+        if (!empty($matches[1])) {
+            $first_image_src = $matches[1];
+            preg_match('/<img.+alt=[\'"]([^\'"]+)[\'"].*>/i', $content_post, $alt_matches);
+            $image_alt = !empty($alt_matches[1]) ? $alt_matches[1] : get_the_title();
+        }
+    }
+?>
 
                     <div class="mpr-single-grid">
                         <div class="mpr-single-left">
                             <div class="mpr-main-image">
-                                <?php if ($first_image_src) : ?>
+                                <?php if ($first_image_src): ?>
                                     <img src="<?php echo esc_url($first_image_src); ?>" alt="<?php echo esc_attr($image_alt); ?>">
-                                <?php else : ?>
+                                <?php
+    else: ?>
                                     <img src="<?php echo MPR_PLUGIN_URL . 'assets/images/placeholder.png'; ?>" alt="Placeholder Image">
-                                <?php endif; ?>
+                                <?php
+    endif; ?>
                             </div>
 
-                            <?php if ( function_exists( 'mpr_display_follow_button' ) ) {
-                                mpr_display_follow_button(get_the_ID());
-                            } ?>
+                            <?php if (function_exists('mpr_display_follow_button')) {
+        mpr_display_follow_button(get_the_ID());
+    }?>
 
                             <div class="mpr-social-share">
                                 <strong>Share this case:</strong>
@@ -109,10 +112,17 @@ do_action( 'hestia_before_single_page_wrapper' ); //
 
                         <div class="mpr-single-right">
                             <?php // The main title will be generated by hestia_before_single_page_wrapper.
-                                  // You might want to remove this inner title if it's redundant.
-                            ?>
+    // You might want to remove this inner title if it's redundant.
+?>
                             <header class="entry-header">
                                 <?php the_title('<h1 class="entry-title">', '</h1>'); ?>
+                                <?php
+    $status = get_post_meta(get_the_ID(), 'mpr_case_status', true);
+    if (!$status)
+        $status = 'Missing';
+    $status_class = 'mpr-status-' . sanitize_title($status);
+    echo '<div class="mpr-status-badge ' . esc_attr($status_class) . '">' . esc_html($status) . '</div>';
+?>
                             </header>
 
                             <h3>Personal Information</h3>
@@ -161,28 +171,29 @@ do_action( 'hestia_before_single_page_wrapper' ); //
                             </div>
 
                             <?php
-                            $other_images_ids = get_post_meta(get_the_ID(), 'mpr_other_images', true);
-                            if ($other_images_ids) {
-                                echo '<h3>Other Images</h3>';
-                                $ids_array = explode(',', $other_images_ids);
-                                echo '<div class="mpr-other-images-gallery">';
-                                foreach ($ids_array as $id) {
-                                    echo '<a href="'.wp_get_attachment_url($id).'" target="_blank">'.wp_get_attachment_image($id, 'medium').'</a>';
-                                }
-                                echo '</div>';
-                            }
-                            ?>
+    $other_images_ids = get_post_meta(get_the_ID(), 'mpr_other_images', true);
+    if ($other_images_ids) {
+        echo '<h3>Other Images</h3>';
+        $ids_array = explode(',', $other_images_ids);
+        echo '<div class="mpr-other-images-gallery">';
+        foreach ($ids_array as $id) {
+            echo '<a href="' . wp_get_attachment_url($id) . '" target="_blank">' . wp_get_attachment_image($id, 'medium') . '</a>';
+        }
+        echo '</div>';
+    }
+?>
                         </div>
                     </div>
                     <?php // --- End of Original Missing Person Content --- ?>
 
                     <?php
-                    // Display comments if enabled
-                    if (comments_open() || get_comments_number()) :
-                        comments_template();
-                    endif;
-                    ?>
+    // Display comments if enabled
+    if (comments_open() || get_comments_number()):
+        comments_template();
+    endif;
+?>
                 </article>
-            <?php endwhile; ?>
+            <?php
+endwhile; ?>
 
         </div> </div> </div> <?php get_footer(); ?>
