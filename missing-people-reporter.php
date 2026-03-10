@@ -1,5 +1,14 @@
 <?php
-/* Plugin Name: Missing People Reporter Plugin URI: https://www.missingpeople.co.ke Description: A comprehensive plugin to create, manage, and display reports for missing people. Version: 1.0.0 Author: Mentaltude / URI: https://www.missingpeople.co.ke License: GPLv2 or later Text Domain: mpr */
+/**
+ * Plugin Name: Missing People Reporter
+ * Plugin URI:  https://www.missingpeople.co.ke
+ * Description: A comprehensive plugin to create, manage, and display reports for missing people.
+ * Version:     1.1.0
+ * Author:      Mentaltude
+ * Author URI:  https://www.missingpeople.co.ke
+ * License:     GPLv2 or later
+ * Text Domain: mpr
+ */
 
 // Prevent direct access to the file
 if (!defined('ABSPATH')) {
