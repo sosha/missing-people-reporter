@@ -1,0 +1,21 @@
+# WordPress Specific
+wp-config.php
+wp-content/uploads/
+wp-content/blogs.dir/
+wp-content/upgrade/
+wp-content/backup-db/
+wp-content/advanced-cache.php
+wp-content/wp-cache-config.php
+wp-content/cache/
+wp-content/languages/
+
+# Plugin Specific
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
+vendor/
+composer.lock
+package-lock.json

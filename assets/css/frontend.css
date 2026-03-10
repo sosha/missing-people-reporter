@@ -1,0 +1,115 @@
+/* --- General Container --- */
+.mpr-container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 20px auto;
+}
+
+/* --- Archive/Summary Grid --- */
+.mpr-summary-container.mpr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+.mpr-summary-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+    text-align: center;
+    background: #f9f9f9;
+}
+.mpr-summary-item img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+.mpr-summary-item h3 {
+    margin: 10px 0;
+    padding: 0 10px;
+}
+.mpr-summary-item p {
+    margin: 0 0 15px 0;
+    font-size: 0.9em;
+    color: #555;
+}
+
+/* --- Single Person Page --- */
+.mpr-single-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+}
+@media (min-width: 768px) {
+    .mpr-single-grid {
+        grid-template-columns: 1fr 2fr;
+    }
+}
+.mpr-main-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+}
+.mpr-details-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+    border: 1px solid #eee;
+}
+.mpr-details-list li {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+.mpr-details-list li:last-child {
+    border-bottom: none;
+}
+.mpr-details-list li strong {
+    display: inline-block;
+    width: 180px;
+    color: #333;
+}
+.mpr-single-right h3 {
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 5px;
+    margin-top: 30px;
+}
+.mpr-single-right h3:first-of-type {
+    margin-top: 0;
+}
+.mpr-social-share, .mpr-follow-btn, .mpr-unfollow-btn {
+    margin-top: 20px;
+}
+.mpr-social-share a {
+    margin-right: 10px;
+}
+
+/* --- User Profile Page --- */
+.mpr-user-profile .profile-section {
+    background: #fdfdfd;
+    border: 1px solid #e5e5e5;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+.mpr-user-profile .profile-section h3 {
+    margin-top: 0;
+}
+.mpr-user-profile ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+/* --- Forms --- */
+#mpr-public-form p {
+    margin-bottom: 15px;
+}
+#mpr-public-form label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+#mpr-public-form input[type="text"],
+#mpr-public-form input[type="number"],
+#mpr-public-form textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+}
