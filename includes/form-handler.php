@@ -70,34 +70,32 @@ function mpr_handle_public_submission()
                 }
             }
 
-            $meta_keys = [
-                'mpr_nickname', 'mpr_age', 'mpr_dob', 'mpr_gender', 'mpr_height', 'mpr_body_type', 'mpr_weight',
-                'mpr_hair_color', 'mpr_hair_style', 'mpr_eye_color', 'mpr_piercings', 'mpr_tattoos',
-                'mpr_date_last_seen', 'mpr_last_seen_location', 'mpr_what_they_were_wearing',
-                'mpr_police_station', 'mpr_ob_number', 'mpr_police_phone', 'mpr_police_email', 'mpr_investigating_officer',
-                'mpr_contact_person', 'mpr_contact_person_email', 'mpr_medical_conditions', 'mpr_ethnicity'
-            ];
+            // Use centralized meta keys for standard fields
+            $meta_keys = mpr_get_meta_keys();
 
-            foreach ($meta_keys as $key) {
+            foreach ($meta_keys as $key => $args) {
                 if (isset($_POST[$key])) {
-                    $value = sanitize_text_field($_POST[$key]);
-                    if (substr($key, -5) === '_email') { // Use sanitize_email for email fields
-                        $value = sanitize_email($_POST[$key]);
+                    $value = $_POST[$key];
+
+                    // Use specialized sanitization if defined
+                    if (isset($args['sanitize']) && function_exists($args['sanitize'])) {
+                        $value = call_user_func($args['sanitize'], $value);
                     }
+                    else {
+                        $value = sanitize_text_field($value);
+                    }
+
                     update_post_meta($post_id, $key, $value);
                 }
-            }
-            if (isset($_POST['mpr_distinguishing_features'])) {
-                update_post_meta($post_id, 'mpr_distinguishing_features', sanitize_textarea_field($_POST['mpr_distinguishing_features']));
             }
 
             // Admin Notification Email
             $admin_email = get_option('admin_email');
-            $subject = 'New Missing Person Report Submitted: ' . sanitize_text_field($_POST['mpr_full_name']);
+            $subject = sprintf(__('New Missing Person Report Submitted: %s', 'mpr'), sanitize_text_field($_POST['mpr_full_name']));
             $edit_link = admin_url('post.php?post=' . $post_id . '&action=edit');
-            $message = "A new missing person report has been submitted on your website.\n\n";
-            $message .= "Name: " . sanitize_text_field($_POST['mpr_full_name']) . "\n";
-            $message .= "Please review and publish it here: " . $edit_link . "\n";
+            $message = __("A new missing person report has been submitted on your website.\n\n", 'mpr');
+            $message .= sprintf(__('Name: %s', 'mpr'), sanitize_text_field($_POST['mpr_full_name'])) . "\n";
+            $message .= sprintf(__('Please review and publish it here: %s', 'mpr'), $edit_link) . "\n";
 
             wp_mail($admin_email, $subject, $message);
 

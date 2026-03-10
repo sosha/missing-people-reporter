@@ -46,6 +46,11 @@ The **Missing People Reporter** plugin is a mission-critical WordPress solution 
 - **Slug**: `/missing-person/`
 - **Fields**: High-integrity metadata sanitized via `sanitize_text_field`.
 
+### Admin Controls
+- **Missing Person CPT**: Full management of missing person profiles.
+- **Agency Information**: Centrally manage organization contact details (Name, Phone, Email, Website) used across the site and in generated posters.
+- **Dynamic Maps**: Integrated Leaflet/OpenStreetMap for location tracking.
+
 ### File Structure
 - `missing-people-reporter.php`: Main core and asset enqueuing.
 - `includes/meta-boxes.php`: Centralized Admin UI for all case data.
@@ -70,6 +75,11 @@ Admins can manage all details from the "Missing People" menu in the WordPress si
 
 ## 📞 5. Future Extensibility
 The plugin includes hooks (`mpr_handle_public_submission`) for integrating third-party SMS alerts or CRM systems. Developers can override aesthetics by placing custom templates in their theme's `missing-person/` directory.
+
+---
+
+## Related Projects
+- **[Missing People Custom Theme](https://github.com/Mentaltude/missing-people-theme)**: A high-impact WordPress theme designed specifically for this plugin.
 
 ---
 **Version**: 1.1.0 

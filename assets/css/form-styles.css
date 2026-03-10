@@ -1,0 +1,189 @@
+/* assets/css/form-styles.css */
+:root {
+    --mpr-primary: #2563eb;
+    --mpr-primary-dark: #1d4ed8;
+    --mpr-bg-glass: rgba(255, 255, 255, 0.85);
+    --mpr-border: rgba(203, 213, 225, 0.5);
+    --mpr-text: #1e293b;
+    --mpr-text-muted: #64748b;
+    --mpr-radius: 12px;
+}
+
+#mpr-public-form-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--mpr-text);
+}
+
+.mpr-multi-step-form {
+    background: var(--mpr-bg-glass);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--mpr-border);
+    border-radius: var(--mpr-radius);
+    padding: 2.5rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+/* Progress Indicator */
+.mpr-steps-indicator {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2.5rem;
+    position: relative;
+}
+
+.mpr-steps-indicator::before {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #e2e8f0;
+    z-index: 0;
+}
+
+.mpr-step-node {
+    position: relative;
+    z-index: 1;
+    background: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.mpr-step-node.active {
+    border-color: var(--mpr-primary);
+    color: var(--mpr-primary);
+    transform: scale(1.1);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.mpr-step-node.completed {
+    background: var(--mpr-primary);
+    border-color: var(--mpr-primary);
+    color: #fff;
+}
+
+/* Form Sections */
+.mpr-form-step {
+    display: none;
+    animation: mprFadeIn 0.4s ease-out;
+}
+
+.mpr-form-step.active {
+    display: block;
+}
+
+@keyframes mprFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.mpr-form-step h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    color: var(--mpr-primary);
+}
+
+/* Form Elements */
+.mpr-field-group {
+    margin-bottom: 1.5rem;
+}
+
+.mpr-field-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    font-size: 0.9375rem;
+}
+
+.mpr-field-group input[type="text"],
+.mpr-field-group input[type="email"],
+.mpr-field-group input[type="number"],
+.mpr-field-group input[type="date"],
+.mpr-field-group select,
+.mpr-field-group textarea {
+    width: 100% !important;
+    padding: 0.75rem 1rem !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    font-size: 1rem !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+.mpr-field-group input:focus,
+.mpr-field-group select:focus,
+.mpr-field-group textarea:focus {
+    outline: none !important;
+    border-color: var(--mpr-primary) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+}
+
+.mpr-field-group small {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--mpr-text-muted);
+    font-size: 0.8125rem;
+}
+
+/* Navigation Buttons */
+.mpr-form-nav {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.mpr-btn-nav {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.mpr-btn-prev {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.mpr-btn-prev:hover {
+    background: #e2e8f0;
+}
+
+.mpr-btn-next,
+.mpr-btn-submit {
+    background: var(--mpr-primary);
+    color: #fff;
+}
+
+.mpr-btn-next:hover,
+.mpr-btn-submit:hover {
+    background: var(--mpr-primary-dark);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.mpr-btn-submit {
+    font-size: 1.125rem;
+    padding: 1rem 2rem;
+}
+
+/* Responsive Grid Helper */
+.mpr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+}

@@ -14,76 +14,24 @@ if (function_exists('mpr_track_view')) {
 
 get_header(); // This pulls in Hestia's main site header (logo, menu, etc.).
 
-// This action hook is crucial for displaying Hestia's page header (title, breadcrumbs)
-// and setting up the main wrapper for the content.
-do_action('hestia_before_single_page_wrapper'); //
-
+<?php
+$layout_class = function_exists('hestia_layout') ? hestia_layout() : 'content-area';
+$post_class = function_exists('hestia_layout') ? 'blog-post' : 'mpr-single-wrapper';
 ?>
-<div class="<?php echo hestia_layout(); ?>">
-    <div class="blog-post"> <?php // This is a key wrapper in Hestia's page templates ?>
-        <div class="container"> <?php // Hestia's main content container ?>
+<div class="<?php echo esc_attr($layout_class); ?>">
+    <div class="<?php echo esc_attr($post_class); ?>">
+        <div class="container">
 
             <?php while (have_posts()):
     the_post(); ?>
-                <article id="post-<?php the_ID(); ?>" <?php post_class('hestia-blog-post'); ?>>
+                <article id="post-<?php the_ID(); ?>" <?php post_class(function_exists('hestia_layout') ? 'hestia-blog-post' : 'mpr-article'); ?>>
 
                     <?php
     // --- Start of Original Missing Person Content (within Hestia's primary content area) ---
 
-    // Image fetching logic
-    $first_image_src = '';
-    $image_alt = get_the_title();
-
-    if (has_post_thumbnail()) {
-        $image_id = get_post_thumbnail_id();
-        $image_array = wp_get_attachment_image_src($image_id, 'large');
-        if ($image_array) {
-            $first_image_src = $image_array[0];
-            $image_alt = get_post_meta($image_id, '_wp_attachment_image_alt', true);
-            if (empty($image_alt)) {
-                $image_alt = get_the_title();
-            }
-        }
-    }
-
-    if (empty($first_image_src)) {
-        $args = array(
-            'post_type' => 'attachment',
-            'post_mime_type' => 'image',
-            'post_parent' => get_the_ID(),
-            'numberposts' => 1,
-            'order' => 'ASC',
-            'orderby' => 'menu_order ID',
-        );
-        $attachments = get_children($args);
-
-        if ($attachments) {
-            foreach ($attachments as $attachment) {
-                $image_array = wp_get_attachment_image_src($attachment->ID, 'large');
-                if ($image_array) {
-                    $first_image_src = $image_array[0];
-                    $image_alt = get_post_meta($attachment->ID, '_wp_attachment_image_alt', true);
-                    if (empty($image_alt)) {
-                        $image_alt = $attachment->post_title;
-                    }
-                    if (empty($image_alt)) {
-                        $image_alt = get_the_title();
-                    }
-                    break;
-                }
-            }
-        }
-    }
-
-    if (empty($first_image_src)) {
-        $content_post = get_the_content();
-        preg_match('/<img.+src=[\'"]([^\'"]+)[\'"].*>/i', $content_post, $matches);
-        if (!empty($matches[1])) {
-            $first_image_src = $matches[1];
-            preg_match('/<img.+alt=[\'"]([^\'"]+)[\'"].*>/i', $content_post, $alt_matches);
-            $image_alt = !empty($alt_matches[1]) ? $alt_matches[1] : get_the_title();
-        }
-    }
+    // Use centralized image helper
+    $first_image_src = mpr_get_case_image_url(get_the_ID(), 'large');
+    $image_alt = get_post_meta(get_post_thumbnail_id(), '_wp_attachment_image_alt', true) ?: get_the_title();
 ?>
 
                     <div class="mpr-single-grid">
@@ -103,15 +51,15 @@ do_action('hestia_before_single_page_wrapper'); //
     }?>
 
                             <div class="mpr-social-share">
-                                <strong>Share this case:</strong>
-                                <a href="https://www.facebook.com/sharer/sharer.php?u=<?php echo urlencode(get_permalink()); ?>" target="_blank">Facebook</a>
-                                <a href="https://twitter.com/intent/tweet?url=<?php echo urlencode(get_permalink()); ?>&text=<?php echo urlencode('Missing: ' . get_the_title()); ?>" target="_blank">X</a>
-                                <a href="https://www.linkedin.com/shareArticle?mini=true&url=<?php echo urlencode(get_permalink()); ?>&title=<?php echo urlencode('Missing: ' . get_the_title()); ?>" target="_blank">LinkedIn</a>
+                                <strong><?php _e('Share this case:', 'mpr'); ?></strong>
+                                <a href="https://www.facebook.com/sharer/sharer.php?u=<?php echo urlencode(get_permalink()); ?>" target="_blank"><?php _e('Facebook', 'mpr'); ?></a>
+                                <a href="https://twitter.com/intent/tweet?url=<?php echo urlencode(get_permalink()); ?>&text=<?php echo urlencode(sprintf(__('Missing: %s', 'mpr'), get_the_title())); ?>" target="_blank"><?php _e('X', 'mpr'); ?></a>
+                                <a href="https://www.linkedin.com/shareArticle?mini=true&url=<?php echo urlencode(get_permalink()); ?>&title=<?php echo urlencode(sprintf(__('Missing: %s', 'mpr'), get_the_title())); ?>" target="_blank"><?php _e('LinkedIn', 'mpr'); ?></a>
                             </div>
 
                             <div class="mpr-print-action" style="margin-top: 20px;">
                                 <button onclick="window.print();" class="mpr-btn-print" style="width: 100%; background: #2c3e50; color: #fff; border: none; padding: 12px; border-radius: 5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                                    <span class="dashicons dashicons-printer"></span> Print Missing Poster
+                                    <span class="dashicons dashicons-printer"></span> <?php _e('Print Missing Poster', 'mpr'); ?>
                                 </button>
                             </div>
                         </div>
@@ -126,60 +74,77 @@ do_action('hestia_before_single_page_wrapper'); //
                                     <?php
     $status = get_post_meta(get_the_ID(), 'mpr_case_status', true);
     if (!$status)
-        $status = 'Missing';
+        $status = __('Missing', 'mpr');
     $status_class = 'mpr-status-' . sanitize_title($status);
     echo '<div class="mpr-status-badge ' . esc_attr($status_class) . '">' . esc_html($status) . '</div>';
 
     $risk_level = get_post_meta(get_the_ID(), 'mpr_risk_level', true);
     if ($risk_level && 'Low' !== $risk_level) {
         $risk_class = 'mpr-risk-' . sanitize_title($risk_level);
-        echo '<div class="mpr-risk-badge ' . esc_attr($risk_class) . '">' . esc_html($risk_level) . ' Risk</div>';
+        echo '<div class="mpr-status-badge ' . esc_attr($risk_class) . '">' . sprintf(__('%s Risk', 'mpr'), esc_html($risk_level)) . '</div>';
     }
 ?>
                                 </div>
                             </header>
 
-                            <h3>Personal Information</h3>
+                            <h3><?php _e('Personal Information', 'mpr'); ?></h3>
                             <ul class="mpr-details-list">
                                 <?php $meta = get_post_meta(get_the_ID()); ?>
-                                <li><strong>Nickname:</strong> <?php echo esc_html($meta['mpr_nickname'][0] ?? 'N/A'); ?></li>
-                                <li><strong>Age:</strong> <?php echo esc_html($meta['mpr_age'][0] ?? 'N/A'); ?></li>
-                                <li><strong>Ethnicity:</strong> <?php echo esc_html($meta['mpr_ethnicity'][0] ?? 'N/A'); ?></li>
-                                <li><strong>Date of Birth:</strong> <?php echo esc_html($meta['mpr_dob'][0] ?? 'N/A'); ?></li>
-                                <li><strong>Gender:</strong> <?php echo esc_html($meta['mpr_gender'][0] ?? 'N/A'); ?></li>
-                                <li><strong>Medical Conditions:</strong> <?php echo esc_html($meta['mpr_medical_conditions'][0] ?? 'N/A'); ?></li>
+                                <li><strong><?php _e('Nickname:', 'mpr'); ?></strong> <?php echo esc_html($meta['mpr_nickname'][0] ?? __('N/A', 'mpr')); ?></li>
+                                <li><strong><?php _e('Age:', 'mpr'); ?></strong> <?php echo esc_html($meta['mpr_age'][0] ?? __('N/A', 'mpr')); ?></li>
+                                <li><strong><?php _e('Ethnicity:', 'mpr'); ?></strong> <?php echo esc_html($meta['mpr_ethnicity'][0] ?? __('N/A', 'mpr')); ?></li>
+                                <li><strong><?php _e('Date of Birth:', 'mpr'); ?></strong> <?php echo esc_html($meta['mpr_dob'][0] ?? __('N/A', 'mpr')); ?></li>
+                                <li><strong><?php _e('Gender:', 'mpr'); ?></strong> <?php echo esc_html($meta['mpr_gender'][0] ?? __('N/A', 'mpr')); ?></li>
+                                <li><strong><?php _e('Medical Conditions:', 'mpr'); ?></strong> <?php echo esc_html($meta['mpr_medical_conditions'][0] ?? __('N/A', 'mpr')); ?></li>
                             </ul>
 
-                            <h3>Physical Description</h3>
+                            <h3><?php _e('Physical Description', 'mpr'); ?></h3>
                             <ul class="mpr-details-list">
-                                 <li><strong>Height:</strong> <?php echo esc_html($meta['mpr_height'][0] ?? 'N/A'); ?></li>
-                                 <li><strong>Weight:</strong> <?php echo esc_html($meta['mpr_weight'][0] ?? 'N/A'); ?></li>
-                                <li><strong>Hair Color:</strong> <?php echo esc_html($meta['mpr_hair_color'][0] ?? 'N/A'); ?></li>
-                                <li><strong>Eye Color:</strong> <?php echo esc_html($meta['mpr_eye_color'][0] ?? 'N/A'); ?></li>
-                                <li><strong>Distinguishing Features:</strong> <?php echo wp_kses_post($meta['mpr_distinguishing_features'][0] ?? 'N/A'); ?></li>
+                                 <li><strong><?php _e('Height:', 'mpr'); ?></strong> <?php echo esc_html($meta['mpr_height'][0] ?? __('N/A', 'mpr')); ?></li>
+                                 <li><strong><?php _e('Weight:', 'mpr'); ?></strong> <?php echo esc_html($meta['mpr_weight'][0] ?? __('N/A', 'mpr')); ?></li>
+                                <li><strong><?php _e('Hair Color:', 'mpr'); ?></strong> <?php echo esc_html($meta['mpr_hair_color'][0] ?? __('N/A', 'mpr')); ?></li>
+                                <li><strong><?php _e('Eye Color:', 'mpr'); ?></strong> <?php echo esc_html($meta['mpr_eye_color'][0] ?? __('N/A', 'mpr')); ?></li>
+                                <li><strong><?php _e('Distinguishing Features:', 'mpr'); ?></strong> <?php echo wp_kses_post($meta['mpr_distinguishing_features'][0] ?? __('N/A', 'mpr')); ?></li>
                             </ul>
 
-                            <h3>Circumstances of Disappearance</h3>
+                            <h3><?php _e('Circumstances of Disappearance', 'mpr'); ?></h3>
                              <ul class="mpr-details-list">
-                                  <li><strong>Date Last Seen:</strong> <?php echo esc_html($meta['mpr_date_last_seen'][0] ?? 'N/A'); ?></li>
-                                 <li><strong>Last Seen Location:</strong> <?php echo esc_html($meta['mpr_last_seen_location'][0] ?? 'N/A'); ?></li>
-                                 <li><strong>What they were wearing:</strong> <?php echo esc_html($meta['mpr_what_they_were_wearing'][0] ?? 'N/A'); ?></li>
+                                  <li><strong><?php _e('Date Last Seen:', 'mpr'); ?></strong> <?php echo esc_html($meta['mpr_date_last_seen'][0] ?? __('N/A', 'mpr')); ?></li>
+                                 <li><strong><?php _e('Last Seen Location:', 'mpr'); ?></strong> <?php echo esc_html($meta['mpr_last_seen_location'][0] ?? __('N/A', 'mpr')); ?></li>
+                                 <li><strong><?php _e('What they were wearing:', 'mpr'); ?></strong> <?php echo esc_html($meta['mpr_what_they_were_wearing'][0] ?? __('N/A', 'mpr')); ?></li>
                             </ul>
 
-                            <h3>Police Report Information</h3>
+                            <h3><?php _e('Police Report Information', 'mpr'); ?></h3>
                              <ul class="mpr-details-list">
-                                  <li><strong>Police Station:</strong> <?php echo esc_html($meta['mpr_police_station'][0] ?? 'N/A'); ?></li>
-                                  <li><strong>OB Number:</strong> <?php echo esc_html($meta['mpr_ob_number'][0] ?? 'N/A'); ?></li>
-                                  <li><strong>Contact Number:</strong> <?php echo esc_html($meta['mpr_police_phone'][0] ?? 'N/A'); ?></li>
-                                  <li><strong>Police Email:</strong> <?php echo esc_html($meta['mpr_police_email'][0] ?? 'N/A'); ?></li>
-                                  <li><strong>Investigating Officer:</strong> <?php echo esc_html($meta['mpr_investigating_officer'][0] ?? 'N/A'); ?></li>
+                                  <li><strong><?php _e('Police Station:', 'mpr'); ?></strong> <?php echo esc_html($meta['mpr_police_station'][0] ?? __('N/A', 'mpr')); ?></li>
+                                  <li><strong><?php _e('OB Number:', 'mpr'); ?></strong> <?php echo esc_html($meta['mpr_ob_number'][0] ?? __('N/A', 'mpr')); ?></li>
+                                  <li><strong><?php _e('Contact Number:', 'mpr'); ?></strong> <?php echo esc_html($meta['mpr_police_phone'][0] ?? __('N/A', 'mpr')); ?></li>
+                                  <li><strong><?php _e('Police Email:', 'mpr'); ?></strong> <?php echo esc_html($meta['mpr_police_email'][0] ?? __('N/A', 'mpr')); ?></li>
+                                  <li><strong><?php _e('Investigating Officer:', 'mpr'); ?></strong> <?php echo esc_html($meta['mpr_investigating_officer'][0] ?? __('N/A', 'mpr')); ?></li>
                             </ul>
 
-                            <h3>Family/Public Contact</h3>
+                            <h3><?php _e('Family/Public Contact', 'mpr'); ?></h3>
                              <ul class="mpr-details-list">
-                                  <li><strong>Contact Person:</strong> <?php echo esc_html($meta['mpr_contact_person'][0] ?? 'N/A'); ?></li>
-                                  <li><strong>Contact Email:</strong> <?php echo esc_html($meta['mpr_contact_person_email'][0] ?? 'N/A'); ?></li>
+                                  <li><strong><?php _e('Contact Person:', 'mpr'); ?></strong> <?php echo esc_html($meta['mpr_contact_person'][0] ?? __('N/A', 'mpr')); ?></li>
+                                  <li><strong><?php _e('Contact Email:', 'mpr'); ?></strong> <?php echo esc_html($meta['mpr_contact_person_email'][0] ?? __('N/A', 'mpr')); ?></li>
                             </ul>
+
+                            <?php
+    $agency_name = get_option('mpr_agency_name');
+    $agency_phone = get_option('mpr_agency_phone');
+    $agency_email = get_option('mpr_agency_email');
+    if ($agency_name):
+?>
+                            <h3><?php _e('Agency / Organization Contact', 'mpr'); ?></h3>
+                             <ul class="mpr-details-list">
+                                  <li><strong><?php _e('Agency:', 'mpr'); ?></strong> <?php echo esc_html($agency_name); ?></li>
+                                  <?php if ($agency_phone): ?><li><strong><?php _e('Phone:', 'mpr'); ?></strong> <?php echo esc_html($agency_phone); ?></li><?php
+        endif; ?>
+                                  <?php if ($agency_email): ?><li><strong><?php _e('Email:', 'mpr'); ?></strong> <?php echo esc_html($agency_email); ?></li><?php
+        endif; ?>
+                            </ul>
+                            <?php
+    endif; ?>
 
                             <?php
     $lat = get_post_meta(get_the_ID(), 'mpr_latitude', true);
@@ -272,7 +237,7 @@ do_action('hestia_before_single_page_wrapper'); //
                         </div>
 
                         <div class="mpr-poster-footer">
-                            <p>Generated by Missing People Reporter - [www.missing.ke]</p>
+                            <p>Generated by <?php echo esc_html(get_option('mpr_agency_name', 'Missing People Reporter')); ?> - [<?php echo esc_html(get_option('mpr_agency_website', 'www.missing.ke')); ?>]</p>
                         </div>
                     </div>
                 </article>

@@ -27,6 +27,64 @@ include(MPR_PLUGIN_PATH . 'includes/form-handler.php');
 include(MPR_PLUGIN_PATH . 'includes/user-profile.php');
 include(MPR_PLUGIN_PATH . 'includes/follow-system.php');
 include(MPR_PLUGIN_PATH . 'includes/template-loader.php');
+include(MPR_PLUGIN_PATH . 'includes/agency-settings.php');
+include(MPR_PLUGIN_PATH . 'includes/admin-dashboard.php');
+include(MPR_PLUGIN_PATH . 'includes/notifications-core.php');
+include(MPR_PLUGIN_PATH . 'includes/notifications-push.php');
+include(MPR_PLUGIN_PATH . 'includes/digest-system.php');
+include(MPR_PLUGIN_PATH . 'includes/notification-settings.php');
+include(MPR_PLUGIN_PATH . 'includes/leads-system.php');
+include(MPR_PLUGIN_PATH . 'includes/comments-integration.php');
+
+/**
+ * Load plugin text domain for localization.
+ */
+function mpr_load_textdomain()
+{
+    load_plugin_textdomain('mpr', false, dirname(plugin_basename(__FILE__)) . '/languages');
+}
+add_action('plugins_loaded', 'mpr_load_textdomain');
+
+/**
+ * Helper to get all custom meta keys for 'missing_person' CPT.
+ * Centralizing this ensures consistency across admin, frontend, and API.
+ */
+function mpr_get_meta_keys()
+{
+    return [
+        'mpr_full_name' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_nickname' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_age' => ['type' => 'integer', 'sanitize' => 'absint'],
+        'mpr_dob' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_gender' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_height' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_body_type' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_weight' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_hair_color' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_hair_style' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_eye_color' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_distinguishing_features' => ['type' => 'string', 'sanitize' => 'wp_kses_post'],
+        'mpr_piercings' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_tattoos' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_date_last_seen' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_last_seen_location' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_what_they_were_wearing' => ['type' => 'string', 'sanitize' => 'sanitize_textarea_field'],
+        'mpr_police_station' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_ob_number' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_police_phone' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_police_email' => ['type' => 'string', 'sanitize' => 'sanitize_email'],
+        'mpr_investigating_officer' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_contact_person' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_contact_person_email' => ['type' => 'string', 'sanitize' => 'sanitize_email'], // Fixed key name consistency
+        'mpr_other_images' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_case_status' => ['type' => 'string', 'sanitize' => 'sanitize_text_field', 'default' => 'Missing'],
+        'mpr_medical_conditions' => ['type' => 'string', 'sanitize' => 'sanitize_textarea_field'],
+        'mpr_ethnicity' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_risk_level' => ['type' => 'string', 'sanitize' => 'sanitize_text_field', 'default' => 'Low'],
+        'mpr_latitude' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+        'mpr_longitude' => ['type' => 'string', 'sanitize' => 'sanitize_text_field'],
+    ];
+}
 
 // Plugin Activation Hook
 register_activation_hook(__FILE__, 'mpr_activate_plugin');
@@ -35,237 +93,25 @@ function mpr_activate_plugin()
 {
     // The CPT is registered via 'init' hook in includes/post-type.php.
     // We only need to flush rewrite rules here for activation to ensure permalinks work immediately.
+    mpr_register_missing_person_post_type();
+    mpr_create_push_subscriptions_table();
+    mpr_create_leads_table();
     flush_rewrite_rules();
 
     // Register custom meta fields for 'missing_person' post type
-    // These need to be registered at activation or init if they are not defined in includes/post-type.php directly
-    // This duplication is often seen in plugins for robustness, but ideally, meta box registration handles update/save.
-    // However, for REST API exposure or specific behaviors, direct registration here is common.
-    register_post_meta('missing_person', 'mpr_full_name', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_nickname', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_age', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'integer',
-        'sanitize_callback' => 'absint',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_dob', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_gender', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_height', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_body_type', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_weight', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_hair_color', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_hair_style', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_eye_color', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_distinguishing_features', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_textarea_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_piercings', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_tattoos', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_date_last_seen', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_last_seen_location', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_what_they_were_wearing', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_textarea_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_police_station', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_ob_number', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_police_phone', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_police_email', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_email',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_investigating_officer', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_contact_person', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_contact_email', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_email',
-        'auth_callback' => '__return_true',
-    ));
-    // Important: The mpr_other_images meta field should store a comma-separated string of attachment IDs.
-    register_post_meta('missing_person', 'mpr_other_images', array(
-        'show_in_rest' => true, // Exposed to REST API if needed
-        'single' => true, // Stored as a single value (comma-separated string)
-        'type' => 'string', // Type is string
-        'sanitize_callback' => 'sanitize_text_field', // Sanitize as text field
-        'auth_callback' => '__return_true', // Allow all users to read/write for now, refine as needed
-    ));
-    // Case Status field
-    register_post_meta('missing_person', 'mpr_case_status', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'default' => 'Missing',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    // Medical Conditions/Vulnerability field
-    register_post_meta('missing_person', 'mpr_medical_conditions', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_textarea_field',
-        'auth_callback' => '__return_true',
-    ));
-    // Ethnicity field
-    register_post_meta('missing_person', 'mpr_ethnicity', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    // Risk Level field
-    register_post_meta('missing_person', 'mpr_risk_level', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'default' => 'Low',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    // GPS Coordinates
-    register_post_meta('missing_person', 'mpr_latitude', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
-    register_post_meta('missing_person', 'mpr_longitude', array(
-        'show_in_rest' => true,
-        'single' => true,
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'auth_callback' => '__return_true',
-    ));
+    $meta_keys = mpr_get_meta_keys();
+    foreach ($meta_keys as $key => $args) {
+        register_post_meta('missing_person', $key, array(
+            'show_in_rest' => true,
+            'single' => true,
+            'type' => $args['type'],
+            'default' => $args['default'] ?? '',
+            'sanitize_callback' => $args['sanitize'],
+            'auth_callback' => function () {
+            return current_user_can('edit_posts');
+        },
+        ));
+    }
 }
 
 // Plugin Deactivation Hook (optional, but good practice)
@@ -280,14 +126,25 @@ function mpr_deactivate_plugin()
 function mpr_enqueue_assets()
 {
     // Frontend styles
-    wp_enqueue_style(
-        'mpr-frontend-css',
-        MPR_PLUGIN_URL . 'assets/css/frontend.css',
-    [],
-        '1.0.0'
-    );
+    wp_enqueue_style('mpr-frontend-css', MPR_PLUGIN_URL . 'assets/css/frontend.css', array(), '1.1.0');
+
+    // Enqueue Push Notifications Script
+    wp_enqueue_script('mpr-push-notifications', MPR_PLUGIN_URL . 'assets/js/notifications.js', array(), '1.1.0', true);
+    wp_localize_script('mpr-push-notifications', 'mpr_push_vars', array(
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce' => wp_create_nonce('mpr_push_nonce'),
+        'sw_url' => MPR_PLUGIN_URL . 'assets/js/sw.js',
+        'vapid_public_key' => get_option('mpr_vapid_public_key', ''),
+        'registering_msg' => __('Registering for notifications...', 'mpr'),
+        'success_msg' => __('Subscribed successfully!', 'mpr'),
+        'error_msg' => __('Subscription failed. Please try again.', 'mpr')
+    ));
 
     wp_enqueue_style('mpr-print-css', MPR_PLUGIN_URL . 'assets/css/print.css', [], '1.0.0', 'print');
+
+    // New Multi-step Form Assets
+    wp_enqueue_style('mpr-form-styles', MPR_PLUGIN_URL . 'assets/css/form-styles.css', array(), '1.1.0');
+    wp_enqueue_script('mpr-form-steps', MPR_PLUGIN_URL . 'assets/js/form-steps.js', array('jquery'), '1.1.0', true);
 
     // Follow system AJAX script - only load on single missing_person posts
     if (is_singular('missing_person')) {
@@ -328,6 +185,17 @@ add_action('wp_enqueue_scripts', 'mpr_enqueue_assets');
 // Enqueue admin scripts for media uploader
 function mpr_enqueue_admin_assets($hook)
 {
+    if ($hook === 'missing_person_page_mpr-notification-settings') {
+        wp_enqueue_script('mpr-admin-notifications', MPR_PLUGIN_URL . 'assets/js/admin-notifications.js', array('jquery'), '1.0.0', true);
+        wp_localize_script('mpr-admin-notifications', 'mpr_admin_notif_vars', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('mpr_notification_test_nonce'),
+            'sending_msg' => __('Sending test push...', 'mpr'),
+            'success_msg' => __('Success!', 'mpr'),
+            'error_msg' => __('Error: ', 'mpr'),
+        ));
+    }
+
     global $post; // Make the $post global available
 
     // Check if we are on a post edit screen ('post.php') or new post screen ('post-new.php')
@@ -398,4 +266,97 @@ function mpr_get_attachment_thumbnail_url_ajax()
     }
 }
 add_action('wp_ajax_get_attachment_thumbnail_url', 'mpr_get_attachment_thumbnail_url_ajax');
-add_action('wp_ajax_nopriv_get_attachment_thumbnail_url', 'mpr_get_attachment_thumbnail_url_ajax'); // If non-logged in users need this (unlikely for admin function)
+// Removing nopriv hook for security as this is an admin uploader helper
+// add_action('wp_ajax_nopriv_get_attachment_thumbnail_url', 'mpr_get_attachment_thumbnail_url_ajax');
+
+/**
+ * Modern Helper to get the best image for a missing person case.
+ * Logic: Featured Image -> First Attachment -> Regex from Content -> Placeholder.
+ */
+function mpr_get_case_image_url($post_id, $size = 'medium')
+{
+    // 1. Featured Image
+    if (has_post_thumbnail($post_id)) {
+        $img = wp_get_attachment_image_src(get_post_thumbnail_id($post_id), $size);
+        if ($img)
+            return $img[0];
+    }
+
+    // 2. Attached Images
+    $attachments = get_children([
+        'post_parent' => $post_id,
+        'post_type' => 'attachment',
+        'post_mime_type' => 'image',
+        'numberposts' => 1,
+        'orderby' => 'menu_order ID',
+        'order' => 'ASC',
+    ]);
+    if ($attachments) {
+        $attachment = reset($attachments);
+        $img = wp_get_attachment_image_src($attachment->ID, $size);
+        if ($img)
+            return $img[0];
+    }
+
+    // 3. Regex from Content
+    $post = get_post($post_id);
+    if ($post) {
+        preg_match('/<img.+src=[\'"]([^\'"]+)[\'"].*>/i', $post->post_content, $matches);
+        if (!empty($matches[1]))
+            return $matches[1];
+    }
+
+    // 4. Placeholder
+    return MPR_PLUGIN_URL . 'assets/images/placeholder.png';
+}
+
+/**
+ * High-performance helper to get case statistics using direct SQL.
+ */
+function mpr_get_stats_counts()
+{
+    global $wpdb;
+    $table = $wpdb->postmeta;
+    $posts_table = $wpdb->posts;
+
+    $results = $wpdb->get_results("
+        SELECT meta_value as label, COUNT(*) as count 
+        FROM $table pm
+        JOIN $posts_table p ON pm.post_id = p.ID
+        WHERE pm.meta_key = 'mpr_case_status' 
+        AND p.post_status = 'publish'
+        GROUP BY meta_value
+    ");
+
+    $stats = [
+        'Missing' => 0,
+        'Found - Safe' => 0,
+        'Found - Deceased' => 0,
+        'Cold Case' => 0,
+    ];
+
+    foreach ($results as $row) {
+        $stats[$row->label] = (int)$row->count;
+    }
+
+    // Risk levels
+    $risk_results = $wpdb->get_results("
+        SELECT meta_value as label, COUNT(*) as count 
+        FROM $table pm
+        JOIN $posts_table p ON pm.post_id = p.ID
+        WHERE pm.meta_key = 'mpr_risk_level' 
+        AND p.post_status = 'publish'
+        GROUP BY meta_value
+    ");
+
+    $risks = ['High' => 0, 'Medium' => 0, 'Low' => 0];
+    foreach ($risk_results as $row) {
+        $risks[$row->label] = (int)$row->count;
+    }
+
+    return [
+        'status' => $stats,
+        'risk' => $risks,
+        'total' => (int)$wpdb->get_var("SELECT COUNT(*) FROM $posts_table WHERE post_type = 'missing_person' AND post_status = 'publish'")
+    ];
+}
