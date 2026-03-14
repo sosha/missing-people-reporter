@@ -40,7 +40,7 @@ $post_class = 'mpr-single-wrapper';
                                     <img src="<?php echo esc_url($first_image_src); ?>" alt="<?php echo esc_attr($image_alt); ?>">
                                 <?php
     else: ?>
-                                    <img src="<?php echo MPR_PLUGIN_URL . 'assets/images/placeholder.png'; ?>" alt="Placeholder Image">
+                                    <img src="<?php echo MPR_PLUGIN_URL . 'assets/images/placeholder.svg'; ?>" alt="Placeholder Image">
                                 <?php
     endif; ?>
                             </div>

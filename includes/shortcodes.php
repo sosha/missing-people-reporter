@@ -124,7 +124,7 @@ function mpr_summary_shortcode($atts)
         }
         else {
             // Fallback to the original placeholder if no image found by any method
-            $output .= '<img src="' . MPR_PLUGIN_URL . 'assets/images/placeholder.png" alt="Placeholder Image">';
+            $output .= '<img src="' . MPR_PLUGIN_URL . 'assets/images/placeholder.svg" alt="Placeholder Image">';
         }
 
         $output .= '</a>';

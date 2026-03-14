@@ -10,20 +10,31 @@
  * DO NOT LEAVE THIS SCRIPT IN A PRODUCTION ENVIRONMENT.
  */
 
-// Load WordPress Core if not already loaded (useful for direct access, but WP-CLI is preferred)
-if (!defined('ABSPATH')) {
-    $wp_load_path = dirname(__FILE__, 5) . '/wp-load.php';
-    if (file_exists($wp_load_path)) {
-        require_once($wp_load_path);
-    }
-    else {
-        die("Please run this via WP-CLI ('wp eval-file') or ensure it can find wp-load.php.");
+// Attempt to load WordPress Core
+$wp_load_paths = [
+    dirname(__FILE__, 5) . '/wp-load.php', // Assuming wp-content/plugins/plugin-name/scripts/
+    dirname(__FILE__, 4) . '/wp-load.php',
+    dirname(__FILE__, 3) . '/wp-load.php',
+    dirname(__FILE__, 2) . '/wp-load.php',
+    dirname(__FILE__, 1) . '/wp-load.php',
+];
+
+$loaded = false;
+foreach ($wp_load_paths as $path) {
+    if (file_exists($path)) {
+        require_once($path);
+        $loaded = true;
+        break;
     }
 }
 
-// Only allow execution by admins if accessed via web
-if (!is_cli() && !current_user_can('manage_options')) {
-    die('Unauthorized access.');
+if (!$loaded) {
+    die("Could not find wp-load.php. Please copy this script to your WordPress root directory to run it.");
+}
+
+// Proceed only if admin or cli
+if (php_sapi_name() !== 'cli' && (!function_exists('current_user_can') || !current_user_can('manage_options'))) {
+    die('Unauthorized access. You must be an administrator to run this script from the browser.');
 }
 
 if (!function_exists('wp_insert_post')) {
@@ -35,7 +46,7 @@ echo "=====================================\n";
 
 // --- 1. Generate Missing Persons ---
 $names = ['John Doe', 'Jane Smith', 'David Kipkorir', 'Amina Onyango', 'Michael Wanjiku', 'Sarah Ndungu', 'Peter Ochieng', 'Mary Moraa', 'Kevin Kimani', 'Gladys Njeri'];
-$statuses = ['Active', 'Found - Safe', 'Found - Deceased', 'Cold Case'];
+$statuses = ['Missing', 'Found - Safe', 'Found - Deceased', 'Cold Case'];
 $risks = ['Low', 'Medium', 'High'];
 $locations = ['Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Thika'];
 
@@ -80,9 +91,9 @@ for ($i = 0; $i < 10; $i++) {
 }
 
 // --- 2. Generate Leads (Comments) ---
-echo "\nGenerating Leads (Comments) for Active Cases...\n";
+echo "\nGenerating Leads (Comments) for Missing Cases...\n";
 foreach ($created_posts as $post_id) {
-    if (get_post_meta($post_id, 'mpr_case_status', true) === 'Active') {
+    if (get_post_meta($post_id, 'mpr_case_status', true) === 'Missing') {
         $num_leads = rand(0, 3);
         if ($num_leads > 0) {
             for ($j = 0; $j < $num_leads; $j++) {
@@ -106,7 +117,7 @@ foreach ($created_posts as $post_id) {
 // --- 3. Generate Subscriptions ---
 echo "\nGenerating Test Dummy Subscriptions...\n";
 global $wpdb;
-$table_name = $wpdb->prefix . 'mpr_subscriptions';
+$table_name = $wpdb->prefix . 'mpr_push_subscriptions';
 
 // Check if table exists before trying to insert
 if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name) {

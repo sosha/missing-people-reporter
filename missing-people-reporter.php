@@ -3,7 +3,7 @@
  * Plugin Name: Missing People Reporter
  * Plugin URI:  https://www.missingpeople.co.ke
  * Description: A comprehensive plugin to create, manage, and display reports for missing people.
- * Version:     1.1.0
+ * Version:     0.1.0
  * Author:      Mentaltude
  * Author URI:  https://www.missingpeople.co.ke
  * License:     GPLv2 or later
@@ -126,10 +126,10 @@ function mpr_deactivate_plugin()
 function mpr_enqueue_assets()
 {
     // Frontend styles
-    wp_enqueue_style('mpr-frontend-css', MPR_PLUGIN_URL . 'assets/css/frontend.css', array(), '1.1.0');
+    wp_enqueue_style('mpr-frontend-css', MPR_PLUGIN_URL . 'assets/css/frontend.css', array(), '0.1.0');
 
     // Enqueue Push Notifications Script
-    wp_enqueue_script('mpr-push-notifications', MPR_PLUGIN_URL . 'assets/js/notifications.js', array(), '1.1.0', true);
+    wp_enqueue_script('mpr-push-notifications', MPR_PLUGIN_URL . 'assets/js/notifications.js', array(), '0.1.0', true);
     wp_localize_script('mpr-push-notifications', 'mpr_push_vars', array(
         'ajax_url' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('mpr_push_nonce'),
@@ -140,11 +140,11 @@ function mpr_enqueue_assets()
         'error_msg' => __('Subscription failed. Please try again.', 'mpr')
     ));
 
-    wp_enqueue_style('mpr-print-css', MPR_PLUGIN_URL . 'assets/css/print.css', [], '1.0.0', 'print');
+    wp_enqueue_style('mpr-print-css', MPR_PLUGIN_URL . 'assets/css/print.css', [], '0.1.0', 'print');
 
     // New Multi-step Form Assets
-    wp_enqueue_style('mpr-form-styles', MPR_PLUGIN_URL . 'assets/css/form-styles.css', array(), '1.1.0');
-    wp_enqueue_script('mpr-form-steps', MPR_PLUGIN_URL . 'assets/js/form-steps.js', array('jquery'), '1.1.0', true);
+    wp_enqueue_style('mpr-form-styles', MPR_PLUGIN_URL . 'assets/css/form-styles.css', array(), '0.1.0');
+    wp_enqueue_script('mpr-form-steps', MPR_PLUGIN_URL . 'assets/js/form-steps.js', array('jquery'), '0.1.0', true);
 
     // Follow system AJAX script - only load on single missing_person posts
     if (is_singular('missing_person')) {
@@ -307,7 +307,7 @@ function mpr_get_case_image_url($post_id, $size = 'medium')
     }
 
     // 4. Placeholder
-    return MPR_PLUGIN_URL . 'assets/images/placeholder.png';
+    return MPR_PLUGIN_URL . 'assets/images/placeholder.svg';
 }
 
 /**

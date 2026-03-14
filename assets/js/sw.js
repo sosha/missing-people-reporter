@@ -3,8 +3,8 @@ self.addEventListener('push', function (event) {
         const data = event.data.json();
         const options = {
             body: data.body,
-            icon: '/wp-content/plugins/missing-people-reporter/assets/images/logo-icon.png', // Fallback icon
-            badge: '/wp-content/plugins/missing-people-reporter/assets/images/logo-icon.png',
+            icon: '/wp-content/plugins/missing-people-reporter/assets/images/logo-icon.svg', // Fallback icon
+            badge: '/wp-content/plugins/missing-people-reporter/assets/images/logo-icon.svg',
             data: {
                 url: data.url
             }
